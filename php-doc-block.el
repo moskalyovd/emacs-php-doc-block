@@ -5,6 +5,7 @@
 ;; Author: Dmitriy Moskalyov <moskalyovd@gmail.com>
 ;; Keywords: php docblock
 ;; Version: 0.0.1
+;; URL: https://github.com/moskalyovd/emacs-php-doc-block
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -19,7 +20,24 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; Commentary:
+
+;; This package provides php DocBlock generator.
+;; How to use:
+;; Clone repository from https://github.com/moskalyovd/emacs-php-doc-block
+;; and add to your .emacs(or init.el) file:
+
+;; (add-to-list 'load-path "~/.emacs.d/emacs-php-doc-block")
+;; (require 'php-doc-block)
+
+;; Then bind command 'php-doc-block to any key you like:
+
+;; (add-hook 'php-mode-hook
+;;          (lambda ()
+;;              (local-set-key (kbd "<C-tab>") 'php-doc-block)))
+
 ;;; Code:
+
 
 (defun php-doc-block-var-or-attr (tag-type type name value)
     "Insert doc block for a property or an attribute"

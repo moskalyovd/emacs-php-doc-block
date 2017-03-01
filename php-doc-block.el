@@ -38,6 +38,19 @@
 
 ;;; Code:
 
+(defun insert-to-prev-line-and-indent (text)
+    "Insert text to the previous line with indentation"
+    (beginning-of-line)
+    (open-line 1)
+    (insert text)
+    (indent-for-tab-command))
+
+(defun insert-to-next-line-and-indent (text)
+    "Insert text to the next line with indentation"
+    (end-of-line)
+    (newline-and-indent)
+    (insert text)
+    (indent-for-tab-command))
 
 (defun php-doc-block-var-or-attr (tag-type type name value)
     "Insert doc block for a property or an attribute"
@@ -53,31 +66,32 @@
       ((and (= (string-width type) 0) (not value))
        (setq type "mixed")))
 
-    (insert "* @" tag-type " " type  " " name "\n"))
+    (insert-to-next-line-and-indent (concat "* @" tag-type " " type  " " name)))
 
 (defun php-doc-block-function (name arguments return-type)
     "Insert php docblock for function"
-    (insert "* " name "\n* \n")
+    (insert-to-next-line-and-indent (concat "* " name))
+
     (when (> (string-width arguments) 0)
+        (insert-to-next-line-and-indent "*")
         (dolist (arg (split-string arguments "\s*,\s*"))
             (string-match "\s*\\(\[a-zA-Z0-9_\]*\\)?\s*\\($\[a-zA-Z0-9_\]+\\)\s*\\(=.*\\)?" arg)
             (php-doc-block-var-or-attr "param" (match-string 1 arg) (match-string 2 arg) (match-string 3 arg))))
 
     (when (> (string-width return-type) 0)
-        (insert "* \n * @return " return-type "\n")))
+        (insert-to-next-line-and-indent "*")
+        (insert-to-next-line-and-indent (concat "* @return " return-type))))
 
 (defun php-doc-block-class (type name)
     "Insert php doc block for class, interface etc."
-    (insert "* " name " " type "\n* \n"))
 
+    (insert-to-next-line-and-indent (concat "* " name " " type)))
 
 (defun php-doc-block ()
     "Insert php docblock"
     (interactive)
-    (beginning-of-line)
     (let ((line (thing-at-point 'line)))
-        (open-line 1)
-        (insert "/**\n")
+        (insert-to-prev-line-and-indent "/**")
 
         (cond
           ((string-match "function\s*\\([A-Za-z0-9_]+\\)(\\(.*\\))\s*:*\s*\\(\[A-Za-z0-9_\]*\\)" line)
@@ -87,7 +101,7 @@
           ((string-match "\\(class\\|interface\\|trait\\|abstract class\\)\s+\\(\[a-zA-Z0-9_\]+\\)" line)
            (php-doc-block-class (match-string 1 line) (match-string 2 line))))
 
-    (insert "*/")))
+        (insert-to-next-line-and-indent "*/")))
 
 (provide 'php-doc-block)
 ;;; php-doc-block.el ends here

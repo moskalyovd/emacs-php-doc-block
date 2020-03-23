@@ -97,24 +97,23 @@
   (interactive)
   (let ((line (thing-at-point 'line)))
     (insert-to-prev-line-and-indent "/**")
-
     (cond
      ((string-match "function\s*" line)
-      (let ((line (thing-at-point 'line)) (func-defun "") (position (point)))
-        (setq func-defun line)
-        (while (equal (string-match "{" line) nil)
-          (forward-line +1)
-          (setq line (thing-at-point 'line))
-          (setq func-defun (concat func-defun line)))
-        (setq func-defun (replace-regexp-in-string "{\\|\n" "" func-defun))
+      (beginning-of-line)
+      (let ((line (thing-at-point 'line)) (func-defun "") (s-point (point)) (e-point (re-search-forward ";\\|{" nil '(nil))))
+        (goto-char s-point)
+        (if e-point
+            (setq func-defun (replace-regexp-in-string "{\\|\n" "" (buffer-substring s-point e-point)))
+          (progn
+            (end-of-line)
+            (setq func-defun (buffer-substring s-point (point))))
+          )
         (when (string-match "function\s+\\([A-Za-z0-9_]+\\)\s*(\\(.*\\))\s*:*\s*\\(\[\?\]?\\)\s*\\(\[A-Za-z0-9_\\\]*\\)" func-defun)
-          (goto-char position)
           (php-doc-block-function (match-string 1 func-defun) (match-string 2 func-defun) (match-string 4 func-defun) (match-string 3 func-defun)))))
      ((string-match "\s*\\([a-zA-Z0-9_]+\\)?\s*\\($\[a-zA-Z0-9_\]+\\)\s*\\(=\[^;\]*\\)?" line)
       (php-doc-block-var-or-attr "var" "" (match-string 2 line) (match-string 3 line) ""))
      ((string-match "\\(class\\|interface\\|trait\\|abstract class\\)\s+\\(\[a-zA-Z0-9_\]+\\)" line)
       (php-doc-block-class (match-string 1 line) (match-string 2 line))))
-
     (insert-to-next-line-and-indent "*/")))
 
 (provide 'php-doc-block)
